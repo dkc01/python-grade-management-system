@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Management System</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="app">
+  <h1>Student Management System</h1>
+
+  {% if message %}
+  <p class="status ok">{{ message }}</p>
+  {% endif %}
+
+  {% if result %}
+  <p class="status">{{ result }}</p>
+  {% endif %}
+
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <div class="menu">
+      <form method="GET">
+        <input type="hidden" name="section" value="add-student">
+        <button class="{{ 'active' if section == 'add-student' else '' }}">Add Student</button>
+      </form>
+
+      <form method="GET">
+        <input type="hidden" name="section" value="edit-student">
+        <button class="{{ 'active' if section == 'edit-student' else '' }}">Edit Student</button>
+      </form>
+
+      <form method="GET">
+        <input type="hidden" name="section" value="delete-student">
+        <button class="{{ 'active' if section == 'delete-student' else '' }}">Delete Student</button>
+      </form>
+
+      <form method="GET">
+        <input type="hidden" name="section" value="add-grade">
+        <button class="{{ 'active' if section == 'add-grade' else '' }}">Add Grade</button>
+      </form>
+
+      <form method="GET">
+        <input type="hidden" name="section" value="edit-grade">
+        <button class="{{ 'active' if section == 'edit-grade' else '' }}">Edit Grade</button>
+      </form>
+
+      <form method="GET">
+        <input type="hidden" name="section" value="delete-grade">
+        <button class="{{ 'active' if section == 'delete-grade' else '' }}">Delete Grade</button>
+      </form>
+
+
+
+      <form method="GET">
+        <input type="hidden" name="section" value="view-average">
+        <button class="{{ 'active' if section == 'view-average' else '' }}">View Student Average</button>
+      </form>
+
+      <form method="GET">
+        <input type="hidden" name="section" value="highest-scorer">
+        <button class="{{ 'active' if section == 'highest-scorer' else '' }}">Highest Scorer</button>
+      </form>
+    </div>
+
+
+    <!-- MAIN PANEL -->
+    <div class="panel">
+
+      <!-- ADD STUDENT -->
+      <section id="add-student" class="section {% if section == 'add-student' %}active{% endif %}">
+        <h2 class="panel-title">Add Student</h2>
+
+        <form method="POST">
+          <input type="hidden" name="action" value="add_student">
+
+          <div class="form-group">
+            <label>Student ID</label>
+            <input name="sid" required>
+          </div>
+
+          <div class="form-group">
+            <label>First Name</label>
+            <input name="first" required>
+          </div>
+
+          <div class="form-group">
+            <label>Last Name</label>
+            <input name="last" required>
+          </div>
+
+          <div class="form-group">
+            <label>Date of Birth</label>
+            <input type="date" name="dob" required>
+          </div>
+
+          <button class="btn-primary">Add</button>
+        </form>
+      </section>
+
+
+      <!-- EDIT STUDENT -->
+      <section id="edit-student" class="section {% if section == 'edit-student' %}active{% endif %}">
+        <h2 class="panel-title">Edit Student</h2>
+
+        <form method="POST">
+          <input type="hidden" name="action" value="edit_student">
+
+          <div class="form-group">
+            <label>Select Student</label>
+            <select name="edit_sid">
+              {% for sid, s in students.items() %}
+              <option value="{{ sid }}">{{ sid }} - {{ s.first }} {{ s.last }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <p class="panel-desc">Fill only fields you want to update</p>
+
+          <div class="form-group">
+            <label>New First Name</label>
+            <input name="edit_first">
+          </div>
+
+          <div class="form-group">
+            <label>New Last Name</label>
+            <input name="edit_last">
+          </div>
+
+          <div class="form-group">
+            <label>New DOB</label>
+            <input type="date" name="edit_dob">
+          </div>
+
+          <button class="btn-primary">Update</button>
+        </form>
+      </section>
+
+
+      <!-- DELETE STUDENT -->
+      <section id="delete-student" class="section {% if section == 'delete-student' %}active{% endif %}">
+        <h2 class="panel-title">Delete Student</h2>
+
+        <form method="POST">
+          <input type="hidden" name="action" value="delete_student">
+
+          <div class="form-group">
+            <label>Select Student</label>
+            <select name="delete_sid">
+              {% for sid, s in students.items() %}
+              <option value="{{ sid }}">{{ sid }} - {{ s.first }} {{ s.last }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <button class="btn-primary">Delete</button>
+        </form>
+      </section>
+
+
+      <!-- ADD GRADE -->
+      <section id="add-grade" class="section {% if section == 'add-grade' %}active{% endif %}">
+        <h2 class="panel-title">Add Grade</h2>
+
+        <form method="POST">
+          <input type="hidden" name="action" value="add_grade">
+
+          <div class="form-group">
+            <label>Select Student</label>
+            <select name="grade_sid">
+              {% for sid, s in students.items() %}
+              <option value="{{ sid }}">{{ sid }} - {{ s.first }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Grade</label>
+            <input type="number" name="grade_value" step="0.01" required>
+          </div>
+
+          <button class="btn-primary">Add Grade</button>
+        </form>
+      </section>
+
+
+      <!-- EDIT GRADE -->
+      <section id="edit-grade" class="section {% if section == 'edit-grade' %}active{% endif %}">
+        <h2 class="panel-title">Edit Grade</h2>
+
+        <form method="POST">
+          <input type="hidden" name="action" value="edit_grade">
+
+          <div class="form-group">
+            <label>Select Student</label>
+            <select name="edit_grade_sid">
+              {% for sid, s in students.items() %}
+              <option value="{{ sid }}">{{ sid }} - {{ s.first }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Grade Index</label>
+            <input type="number" name="grade_index" min="0">
+          </div>
+
+          <div class="form-group">
+            <label>New Grade</label>
+            <input type="number" name="new_grade" step="0.01">
+          </div>
+
+          <button class="btn-primary">Update Grade</button>
+        </form>
+      </section>
+
+
+      <!-- DELETE GRADE -->
+      <section id="delete-grade" class="section {% if section == 'delete-grade' %}active{% endif %}">
+        <h2 class="panel-title">Delete Grade</h2>
+
+        <form method="POST">
+          <input type="hidden" name="action" value="delete_grade">
+
+          <div class="form-group">
+            <label>Select Student</label>
+            <select name="delete_grade_sid">
+              {% for sid, s in students.items() %}
+              <option value="{{ sid }}">{{ sid }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Grade Index</label>
+            <input type="number" name="delete_grade_index" min="0">
+          </div>
+
+          <button class="btn-primary">Delete Grade</button>
+        </form>
+      </section>
+
+
+      <!-- VIEW AVERAGE -->
+      <section id="view-average" class="section {% if section == 'view-average' %}active{% endif %}">
+        <h2 class="panel-title">View Average</h2>
+
+        <form method="POST">
+          <input type="hidden" name="action" value="view_average">
+
+          <div class="form-group">
+            <label>Select Student</label>
+            <select name="avg_sid">
+              {% for sid, s in students.items() %}
+              <option value="{{ sid }}">{{ sid }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <button class="btn-primary">Compute</button>
+        </form>
+
+        {% if result and section == 'view-average' %}
+        <p class="output">{{ result }}</p>
+        {% endif %}
+      </section>
+
+
+      <!-- HIGHEST SCORER -->
+      <section id="highest-scorer" class="section {% if section == 'highest-scorer' %}active{% endif %}">
+        <h2 class="panel-title">Highest Scorer</h2>
+
+        <form method="POST">
+          <input type="hidden" name="action" value="highest">
+          <button class="btn-primary">Find Highest</button>
+        </form>
+
+        {% if result and section == 'highest-scorer' %}
+        <p class="output">{{ result }}</p>
+        {% endif %}
+      </section>
+
+    </div>
+
+  </div>
+
+  <!-- STUDENT TABLE -->
+  <h2>All Students</h2>
+
+  <div class="output">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>DOB</th>
+          <th>Grades</th>
+          <th>Average</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for sid, s in students.items() %}
+        <tr>
+          <td>{{ sid }}</td>
+          <td>{{ s.first }} {{ s.last }}</td>
+          <td>{{ s.dob }}</td>
+          <td>
+            {% for g in s.grades %}
+              <span class="chip">{{ g }}</span>
+            {% endfor %}
+          </td>
+          <td>
+            {% if s.grades %}
+              {{ "%.2f"|format((s.grades | sum) / (s.grades | length)) }}
+            {% else %}
+              –
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+</body>
+</html>

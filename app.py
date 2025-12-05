@@ -85,12 +85,14 @@ def index():
     # ADD STUDENT
     # -----------------------------------
     if request.form.get("action") == "add_student":
-        sid = request.form.get("sid")
-        first = request.form.get("first")
-        last = request.form.get("last")
-        dob = request.form.get("dob")
+        sid = request.form.get("sid", "").strip()
+        first = request.form.get("first", "").strip()
+        last = request.form.get("last", "").strip()
+        dob = request.form.get("dob", "").strip()
 
-        if sid in students:
+        if not sid or not first or not last or not dob:
+            message = "All fields are required."
+        elif sid in students:
             message = "Student ID already exists."
         else:
             students[sid] = {
@@ -146,15 +148,24 @@ def index():
     # ADD GRADE
     # -----------------------------------
     elif request.form.get("action") == "add_grade":
-        sid = request.form.get("grade_sid")
-        grade = request.form.get("grade_value")
+        sid = request.form.get("grade_sid", "").strip()
+        grade_value = request.form.get("grade_value", "").strip()
 
-        if sid in students:
-            students[sid]["grades"].append(float(grade))
-            save_data()
-            message = "Grade added."
-        else:
+        if not sid or not grade_value:
+            message = "Student ID and grade are required."
+        elif sid not in students:
             message = "Student not found."
+        else:
+            try:
+                grade = float(grade_value)
+                if grade < 0 or grade > 100:
+                    message = "Grade must be between 0 and 100."
+                else:
+                    students[sid]["grades"].append(grade)
+                    save_data()
+                    message = "Grade added."
+            except ValueError:
+                message = "Invalid grade value. Please enter a number."
 
         section = "add-grade"
 
@@ -162,18 +173,28 @@ def index():
     # EDIT GRADE
     # -----------------------------------
     elif request.form.get("action") == "edit_grade":
-        sid = request.form.get("edit_grade_sid")
-        index = int(request.form.get("grade_index"))
-        new_value = float(request.form.get("new_grade"))
+        sid = request.form.get("edit_grade_sid", "").strip()
+        grade_index = request.form.get("grade_index", "").strip()
+        new_grade = request.form.get("new_grade", "").strip()
 
-        if sid not in students:
+        if not sid or not grade_index or not new_grade:
+            message = "All fields are required."
+        elif sid not in students:
             message = "Student not found."
-        elif index < 0 or index >= len(students[sid]["grades"]):
-            message = "Invalid grade index."
         else:
-            students[sid]["grades"][index] = new_value
-            save_data()
-            message = "Grade updated."
+            try:
+                index = int(grade_index)
+                new_value = float(new_grade)
+                if new_value < 0 or new_value > 100:
+                    message = "Grade must be between 0 and 100."
+                elif index < 0 or index >= len(students[sid]["grades"]):
+                    message = "Invalid grade index."
+                else:
+                    students[sid]["grades"][index] = new_value
+                    save_data()
+                    message = "Grade updated."
+            except ValueError:
+                message = "Invalid input. Please enter valid numbers."
 
         section = "edit-grade"
 
@@ -231,6 +252,28 @@ def index():
             result = "No grades available."
 
         section = "highest-scorer"
+
+    # -----------------------------------
+    # LOWEST SCORER
+    # -----------------------------------
+    elif request.form.get("action") == "lowest":
+        best = float('inf')
+        top = None
+
+        for sid, s in students.items():
+            if s["grades"]:
+                avg = sum(s["grades"]) / len(s["grades"])
+                if avg < best:
+                    best = avg
+                    top = sid
+
+        if top:
+            student = students[top]
+            result = f"{student['first']} {student['last']} → {best:.2f}"
+        else:
+            result = "No grades available."
+
+        section = "lowest-scorer"
 
     return render_template("index.html",
                            students=students,

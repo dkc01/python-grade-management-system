@@ -64,6 +64,11 @@
         <input type="hidden" name="section" value="highest-scorer">
         <button class="{{ 'active' if section == 'highest-scorer' else '' }}">Highest Scorer</button>
       </form>
+
+      <form method="GET">
+        <input type="hidden" name="section" value="lowest-scorer">
+        <button class="{{ 'active' if section == 'lowest-scorer' else '' }}">Lowest Scorer</button>
+      </form>
     </div>
 
 
@@ -279,6 +284,20 @@
         </form>
 
         {% if result and section == 'highest-scorer' %}
+        <p class="output">{{ result }}</p>
+        {% endif %}
+      </section>
+
+      <!-- LOWEST SCORER -->
+      <section id="lowest-scorer" class="section {% if section == 'lowest-scorer' %}active{% endif %}">
+        <h2 class="panel-title">Lowest Scorer</h2>
+
+        <form method="POST">
+          <input type="hidden" name="action" value="lowest">
+          <button class="btn-primary">Find Lowest</button>
+        </form>
+
+        {% if result and section == 'lowest-scorer' %}
         <p class="output">{{ result }}</p>
         {% endif %}
       </section>
